@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agroindustrias del Tolima S.A.S. - Dashboard Analítico y Pronósticos Financieros</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js y Plugin Zoom -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
+
+    <style>
+        :root {
+            --rose-gold: #b76e79;
+            --rose-gold-light: #d4a5a5;
+            --pastel-pink: #f3e6e8;
+            --pearl-white: #fdfbfb;
+            --dark-contrast: #2c3e50;
+            --gray-subtle: #8a96a3;
+            --shadow: rgba(183, 110, 121, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--pearl-white) 0%, #ebedee 100%);
+            color: var(--dark-contrast);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+            color: var(--rose-gold);
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        ul {
+            margin-bottom: 15px;
+            padding-left: 20px;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 30px var(--shadow);
+        }
+
+        .hero-section h1 {
+            font-size: 2.8rem;
+            color: var(--dark-contrast);
+            margin-bottom: 0;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 30px 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-top: 1px solid rgba(183, 110, 121, 0.2);
+            font-size: 1.1rem;
+            color: var(--dark-contrast);
+        }
+
+        .footer .highlight {
+            color: var(--rose-gold);
+            font-weight: 700;
+        }
+
+        /* Sticky Navigation */
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(253, 251, 251, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid rgba(183, 110, 121, 0.2);
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            padding: 10px 18px;
+            margin: 5px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--dark-contrast);
+            cursor: pointer;
+            border-radius: 25px;
+            transition: all 0.4s ease;
+        }
+
+        .tab-btn:hover {
+            background: var(--pastel-pink);
+            color: var(--rose-gold);
+        }
+
+        .tab-btn.active {
+            background: var(--rose-gold);
+            color: white;
+            box-shadow: 0 4px 12px var(--shadow);
+            border: 1px solid var(--rose-gold-light);
+        }
+
+        /* Main Content */
+        .content-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 10px 40px var(--shadow);
+            flex: 1;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Tables */
+        .table-container {
+            max-height: 500px;
+            overflow-y: auto;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px var(--shadow);
+            margin: 25px 0;
+            border: 1px solid rgba(183, 110, 121, 0.2);
+            background: white;
+        }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        .styled-table th, .styled-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--pastel-pink);
+        }
+
+        .styled-table th {
+            background: var(--rose-gold);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            font-weight: 600;
+        }
+
+        .styled-table tbody tr {
+            transition: background-color 0.3s ease;
+        }
+
+        .styled-table tbody tr:nth-of-type(even) {
+            background-color: rgba(243, 230, 232, 0.3);
+        }
+
+        .styled-table tbody tr:hover {
+            background-color: var(--pastel-pink);
+        }
+
+        /* Charts */
+        .chart-container {
+            width: 100%;
+            max-width: 950px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px var(--shadow);
+            border: 1px solid rgba(183, 110, 121, 0.1);
+        }
+
+        canvas {
+            width: 100% !important;
+            height: auto !important;
+            max-height: 500px;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="hero-section">
+        <h1>Diplomado en Análisis de Datos: Fundamentos y Aplicaciones en Power BI</h1>
+    </header>
+
+    <nav class="sticky-nav">
+        <button class="tab-btn active" onclick="openTab(event, 'tab-0')">Contextualización del caso</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-1')">Generación de datos</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-2')">Análisis exploratorio</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-3')">Último valor</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-4')">Promedio simple</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-5')">Promedio móvil</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-6')">Suavización exp. simple</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-7')">Suavización exp. doble (Holt)</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-8')">Regresión lineal</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-9')">ARIMA(1,1,1)</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-10')">Validación (Métricas)</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-11')">Comparación Excel vs IA</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-12')">Recomendaciones Gerenciales y Plan de Acción</button>
+    </nav>
+
+    <main class="content-container">
+
+        <!-- TAB 0 -->
+        <section id="tab-0" class="tab-content active">
+            <h3>0. Contextualización del caso corporativo</h3>
+            
+            <h4>0.1 Resumen del caso</h4>
+            <p>Agroindustrias del Tolima S.A.S. es una empresa colombiana fundada en 2018, con sede en Ibagué y operaciones en Espinal, Rovira y Cajamarca. Produce y comercializa derivados agrícolas premium: harina de yuca, fécula de plátano y snacks deshidratados de frutas tropicales. Cuenta con 85 empleados, factura cerca de $4.800 millones de pesos al año y ha crecido alrededor de 12% anual en sus primeros cuatro años.</p>
+            <p>Su problema actual está en la gestión de inventarios y la planificación de la producción. La demanda es muy estacional y los precios de las materias primas son volátiles. Por eso la empresa acumula inventario en los meses de baja demanda, con un costo de almacenamiento del 8% sobre el valor del producto, y se queda sin producto en los meses pico, con una pérdida estimada de ventas del 15%. El consejo directivo necesita pronósticos confiables para los próximos 6 meses que le permitan optimizar la planificación financiera y operativa.</p>
+            
+            <h4>0.2 Variables críticas</h4>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead>
+                        <tr><th>Variable</th><th>Por qué es crítica</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Ventas mensuales</td><td>Representan la demanda; de ellas depende todo el plan de producción y de compras.</td></tr>
+                        <tr><td>Costos de producción</td><td>Incluyen materias primas, mano de obra directa y costos indirectos; los precios de las materias primas son volátiles y afectan el margen.</td></tr>
+                        <tr><td>Gastos administrativos</td><td>Son costos casi fijos (nómina, servicios, arrendamientos) que presionan la rentabilidad cuando las ventas bajan.</td></tr>
+                        <tr><td>Inventario promedio</td><td>Está ligado al problema central: el sobrestock genera costo de almacenamiento (8%) y el faltante genera ventas perdidas (15%).</td></tr>
+                        <tr><td>Clientes activos</td><td>Indican si el crecimiento de la demanda viene de más clientes o de mayor consumo por cliente.</td></tr>
+                        <tr><td>Pedidos procesados</td><td>Miden la carga operativa y suelen anticipar los picos de demanda.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>Las más críticas son las ventas mensuales y el inventario promedio: las ventas son la serie que se debe pronosticar porque define cuánto producir, y el inventario es donde se materializa el costo del error, ya que un pronóstico alto genera sobrestock y uno bajo genera desabastecimiento.</p>
+            
+            <h4>0.3 Hipótesis sobre el comportamiento de la demanda</h4>
+            <p><strong>H1. Estacionalidad:</strong> las ventas presentan picos y valles que se repiten en ciertos meses del año.</p>
+            <p><strong>H2. Tendencia:</strong> existe una tendencia creciente de largo plazo, coherente con el crecimiento sostenido de la empresa.</p>
+            <p><strong>H3. Inventario:</strong> el inventario se mueve en sentido contrario a la demanda, acumulándose en los meses bajos.</p>
+            <p><strong>H4. Costos:</strong> los costos de producción varían más que las ventas por la volatilidad de las materias primas.</p>
+            <p><strong>H5. Métodos de pronóstico:</strong> los métodos simples (último valor y promedio simple) tendrán errores altos porque no capturan tendencia ni estacionalidad.</p>
+            
+            <h4>0.4 Horizonte de pronóstico</h4>
+            <p>El horizonte definido es de 6 meses, por tres razones: (1) es el plazo que solicita el consejo directivo; (2) cubre medio año, que incluye meses de alta y baja demanda; y (3) es suficiente para planificar compras y producción sin que la confiabilidad se deteriore, pues el error de los métodos de series de tiempo crece al proyectar más lejos.</p>
+        </section>
+
+        <!-- TAB 1 -->
+        <section id="tab-1" class="tab-content">
+            <h3>1. Generación de datos aleatorios controlados</h3>
+            
+            <h4>1.1 Parámetros utilizados (Grupo 4)</h4>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead><tr><th>Parámetro</th><th>Valor</th></tr></thead>
+                    <tbody>
+                        <tr><td>Rango de ventas del grupo</td><td>100.000 – 300.000 (miles de pesos)</td></tr>
+                        <tr><td>Tendencia</td><td>Creciente 8% mensual (compuesta)</td></tr>
+                        <tr><td>Estacionalidad</td><td>Alta ±25%, senoidal, pico en abril y valle en octubre</td></tr>
+                        <tr><td>Ruido</td><td>Normal, desviación del 8% al 12%</td></tr>
+                        <tr><td>Base de ventas</td><td>74.000 miles</td></tr>
+                        <tr><td>Costos de producción</td><td>60% de las ventas, con ruido de 5%</td></tr>
+                        <tr><td>Gastos administrativos</td><td>12% de las ventas, con ruido de 5%</td></tr>
+                        <tr><td>Inventario promedio</td><td>1,5 × tendencia × (1 − estacionalidad), con ruido de 5%</td></tr>
+                        <tr><td>Pedidos procesados</td><td>Ventas ÷ 500 (valor promedio por pedido)</td></tr>
+                        <tr><td>Clientes activos</td><td>Pedidos ÷ 1,5, con ruido de 5%</td></tr>
+                        <tr><td>Periodos</td><td>30: 24 de ajuste (1 a 24) y 6 de validación (25 a 30)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>1.2 Explicación Metodológica y Parámetros de Generación</h4>
+            <p>Para garantizar la robustez estadística del ejercicio, se generó una base de datos extendida de 100 meses utilizando algoritmos de Inteligencia Artificial (IA). El objetivo fue simular y auditar el comportamiento de la demanda a largo plazo aplicando estrictamente los parámetros asignados para el Grupo 4:</p>
+            
+            <h4>1.3 Justificación de la Muestra (Corte en el Periodo 24)</h4>
+            <p>El caso corporativo de Agroindustrias del Tolima S.A.S. establece como restricción técnica que las ventas para el ajuste de los modelos deben fluctuar en un rango operativo de 100.000 a 300.000 miles de pesos.</p>
+            <p>Al proyectar los 100 datos con la IA, se evidencia el fuerte impacto del interés compuesto (8% mensual). Como se observa en la gráfica y la tabla, la serie se mantiene dentro del rango permitido estrictamente desde el Mes 1 hasta el Mes 24. A partir del Mes 25, el crecimiento exponencial rompe el tope máximo y continúa una escalada agresiva hasta superar los 209 millones en el mes 100.</p>
+            <p>Por esta razón matemática, se aislaron los primeros 24 meses como la ventana óptima y válida para el ajuste de los modelos de pronóstico financiero, utilizando los meses 25 al 30 exclusivamente para someter los modelos a un choque de estrés (validación out-of-sample).</p>
+
+            <h4>1.4 Tabla de Datos Generados (100 Periodos)</h4>
+            <div class="table-container">
+                <table class="styled-table" id="tabla-100-periodos"></table>
+            </div>
+
+            <h4>1.5 Comportamiento Gráfico de la Serie (Datos Aleatorios y Ventas 30 Periodos combinados)</h4>
+            <div class="chart-container"><canvas id="chart-100"></canvas></div>
+            <p><strong>Análisis Visual de la Gráfica:</strong> La representación de estos 100 datos evidencia una curva en forma de "palo de hockey". Debido al crecimiento compuesto, los primeros 24 meses parecen ser una línea casi plana cerca del eje inferior. Sin embargo, una vez superado el mes 25, la tendencia domina por completo sobre la estacionalidad, confirmando visualmente que un análisis lineal tradicional fracasaría al intentar proyectar esta demanda a largo plazo.</p>
+
+            <h4>1.6 Validación de coherencia con el caso</h4>
+            <p>En los periodos 1 a 24 las ventas son siempre positivas, están entre 102.119 y 297.683 (dentro del rango de 100.000 a 300.000), los costos son siempre menores que las ventas y la serie muestra tendencia creciente y patrón estacional.</p>
+            <p><strong>Lectura de la gráfica.</strong> Hasta el periodo 11 las ventas se mueven entre 100.000 y 140.000; entre los periodos 12 y 17 se aceleran de 161.530 a 294.386 (+82%); y luego se estabilizan en una meseta alrededor de 270.000 a 295.000, con una caída en el periodo 21 (242.754). A partir del periodo 25 las ventas saltan a 526.976 (+77,0% frente al periodo 24) y siguen creciendo hasta 921.626 en el periodo 30.</p>
+        </section>
+
+        <!-- TAB 2 -->
+        <section id="tab-2" class="tab-content">
+            <h3>2. Análisis exploratorio de series temporales</h3>
+            <p>El análisis exploratorio se realiza sobre los 24 periodos de ajuste, para no usar información de los meses que luego se validan.</p>
+            
+            <h4>2.1 Graficación e identificación de patrones</h4>
+            <p>La serie de ventas muestra una tendencia creciente marcada: pasa de unos 102.000 a casi 298.000 en 24 meses, con una pendiente de unos 9.963 por mes. Sobre esa tendencia se aprecian oscilaciones que corresponden a la estacionalidad de ±25% y pequeñas variaciones aleatorias, que son el componente irregular. Con solo 24 meses no es posible identificar una ciclicidad de largo plazo.</p>
+            
+            <h4>2.2 Estadísticos descriptivos</h4>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead><tr><th>Variable</th><th>Media</th><th>Mediana</th><th>Desv. est.</th><th>CV</th><th>P25</th><th>P75</th><th>Mín.</th><th>Máx.</th></tr></thead>
+                    <tbody>
+                        <tr><td>Ventas mensuales</td><td>196.753</td><td>172.749</td><td>77.482</td><td>39,4%</td><td>127.931</td><td>274.946</td><td>102.119</td><td>297.683</td></tr>
+                        <tr><td>Costos de producción</td><td>118.804</td><td>103.580</td><td>47.341</td><td>39,8%</td><td>78.396</td><td>167.568</td><td>58.920</td><td>179.626</td></tr>
+                        <tr><td>Gastos administrativos</td><td>23.963</td><td>19.912</td><td>9.449</td><td>39,4%</td><td>15.497</td><td>33.671</td><td>13.300</td><td>37.714</td></tr>
+                        <tr><td>Inventario promedio</td><td>345.477</td><td>288.100</td><td>223.647</td><td>64,7%</td><td>179.953</td><td>400.978</td><td>112.657</td><td>842.352</td></tr>
+                        <tr><td>Clientes activos</td><td>263</td><td>232</td><td>102</td><td>38,9%</td><td>167</td><td>358</td><td>136</td><td>425</td></tr>
+                        <tr><td>Pedidos procesados</td><td>394</td><td>346</td><td>155</td><td>39,4%</td><td>256</td><td>550</td><td>204</td><td>595</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>La media de las ventas (196.753) es mayor que la mediana (172.749): la distribución se alarga hacia los valores altos porque la mitad de los datos son los meses de crecimiento fuerte. El coeficiente de variación de 39,4% es alto y refleja sobre todo la tendencia, no un ruido grande. El inventario es la variable más dispersa (CV de 64,7%), lo que coincide con el problema del caso.</p>
+
+            <h4>2.3 Autocorrelación (ACF)</h4>
+            <p>La ACF de las ventas decae lentamente, señal típica de una serie con tendencia. Al diferenciar, la autocorrelación del rezago 1 desaparece, pero quedan valores relevantes en los rezagos 2 y 7, que apuntan a un componente estacional. Con 23 observaciones las bandas de confianza (±0,41) son anchas, y la PACF no aporta información adicional confiable.</p>
+
+            <h4>2.4 Estacionariedad (prueba conceptual de Dickey-Fuller)</h4>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead><tr><th>Serie</th><th>Estadístico t</th><th>Valor crítico aprox. (5%)</th><th>Conclusión</th></tr></thead>
+                    <tbody>
+                        <tr><td>Ventas originales</td><td>-0,58</td><td>−3,0</td><td>No estacionaria</td></tr>
+                        <tr><td>Ventas diferenciadas (d = 1)</td><td>-4,44</td><td>−3,0</td><td>Estacionaria</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <h4>2.5 Conclusiones y selección preliminar de métodos</h4>
+            <ul>
+                <li>Con tendencia fuerte, los métodos sin tendencia (promedio simple, promedios móviles largos) tendrán un rezago grande y subestimarán.</li>
+                <li>Los métodos que capturan tendencia (Holt, regresión lineal, ARIMA) son los candidatos naturales; el último valor sirve como línea base.</li>
+                <li>Ningún método previsto modela directamente la estacionalidad, lo que limitará la precisión de todos.</li>
+            </ul>
+        </section>
+
+        <!-- TAB 3 -->
+        <section id="tab-3" class="tab-content">
+            <h3>3. Pronóstico con el método del último valor</h3>
+            
+            <h4>3.1 Tabla Completa de Pronósticos (Periodos 1 a 30)</h4>
+            <div class="table-container"><table class="styled-table" id="table-ultimo-valor"></table></div>
+
+            <h4>3.2 Cálculo de errores históricos para validación</h4>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead><tr><th>Métrica</th><th>ME</th><th>MAD</th><th>MSE (millones)</th><th>MAPE</th></tr></thead>
+                    <tbody>
+                        <tr><td>Ajuste: periodos 2 a 24</td><td>8.503</td><td>17.167</td><td>525</td><td>8,9%</td></tr>
+                        <tr><td>Validación: periodos 25 a 30</td><td>103.991</td><td>135.448</td><td>24.099</td><td>19,7%</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>3.3 Gráfico comparativo (Real vs Pronóstico)</h4>
+            <div class="chart-container"><canvas id="chart-ultimo-valor"></canvas></div>
+
+            <h4>3.4 Análisis crítico</h4>
+            <p><strong>Qué muestran los resultados.</strong> En el ajuste (periodos 2 a 24) el método es bueno: MAPE de 8,9% y MAD de 17.167, porque cada mes se parece mucho al anterior. Sin embargo, en la validación de los 6 meses siguientes el error se multiplica: MAPE de 19,7% y MAD de 135.448. El mayor error es el del periodo 25 (229.293): el pronóstico fue 297.683 y la venta real 526.976.</p>
+            <p><strong>¿Cuándo es apropiado?</strong> Cuando la serie es estable o cambia lentamente. <strong>¿Cuáles son sus limitaciones?</strong> Traslada al pronóstico todo el ruido del último dato y reacciona siempre con un mes de retraso. <strong>¿Captura tendencia o estacionalidad?</strong> Ninguna de las dos. <strong>¿Cuándo descartarlo?</strong> Cuando se necesita proyectar varios periodos con tendencia o estacionalidad fuertes, o cuando un error de subestimación es costoso.</p>
+        </section>
+
+        <!-- TAB 4 -->
+        <section id="tab-4" class="tab-content">
+            <h3>4. Pronóstico con promedio simple</h3>
+            
+            <h4>4.1 Tabla Completa de Pronósticos (Periodos 1 a 30)</h4>
+            <div class="table-container"><table class="styled-table" id="table-prom-simple"></table></div>
+
+            <h4>4.2 Cálculo de errores históricos</h4>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead><tr><th>Métrica</th><th>ME</th><th>MAD</th><th>MSE (millones)</th><th>MAPE</th></tr></thead>
+                    <tbody>
+                        <tr><td>Ajuste: periodos 2 a 24</td><td>61.655</td><td>61.655</td><td>6.381</td><td>25,1%</td></tr>
+                        <tr><td>Validación: periodos 25 a 30</td><td>480.179</td><td>480.179</td><td>242.445</td><td>66,5%</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>4.3 Gráfico comparativo</h4>
+            <div class="chart-container"><canvas id="chart-promedio-simple"></canvas></div>
+
+            <h4>4.4 Análisis crítico</h4>
+            <p><strong>Comparación con el último valor.</strong> El promedio simple es claramente peor: su MAPE en el ajuste es de 25,1%, frente a 8,9% del último valor. En el gráfico, su curva queda siempre por debajo de las ventas y se separa más a medida que la serie crece.</p>
+            <p><strong>¿Cuándo es superior? ¿Cómo afecta la tendencia?</strong> Este método solo sería superior en una serie sin tendencia ni estacionalidad. Con tendencia es el más perjudicado: al dar el mismo peso a un dato de hace 24 meses que al de ayer, el pronóstico queda atrasado. Aquí el ME es igual al MAD (61.655), es decir, subestima en todos los periodos sin excepción.</p>
+        </section>
+
+        <!-- TAB 5 -->
+        <section id="tab-5" class="tab-content">
+            <h3>5. Pronóstico con promedio móvil</h3>
+            
+            <h4>5.1 Tabla Completa de Pronósticos n=3, 6, 12 (Periodos 1 a 30)</h4>
+            <div class="table-container"><table class="styled-table" id="table-movil"></table></div>
+
+            <h4>5.2 Errores por valor de n</h4>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead><tr><th>n</th><th>Ajuste (13-24): ME</th><th>MAD</th><th>MSE (millones)</th><th>MAPE</th><th>Validación (25-30): MAPE</th></tr></thead>
+                    <tbody>
+                        <tr><td>n = 3</td><td>22.917</td><td>32.669</td><td>1.844</td><td>12,9%</td><td>27,4%</td></tr>
+                        <tr><td>n = 6</td><td>40.323</td><td>51.604</td><td>3.926</td><td>19,7%</td><td>41,1%</td></tr>
+                        <tr><td>n = 12</td><td>78.346</td><td>78.346</td><td>7.755</td><td>29,1%</td><td>50,6%</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>5.3 Gráficos superpuestos de los modelos</h4>
+            <div class="chart-container"><canvas id="chart-promedio-movil"></canvas></div>
+
+            <h4>5.4 Justificación del n óptimo</h4>
+            <p>Se selecciona n = 3: tiene el menor error en las cuatro métricas de ajuste y en la validación. En el gráfico se ve que la curva de n = 12 va muy por debajo de las ventas, y la de n = 3 las sigue más de cerca.</p>
+            <p><strong>Por qué el error crece con n.</strong> Como la serie sube, el promedio de n datos pasados está atrasado. Es el equilibrio entre responsividad y estabilidad: con tendencia fuerte, reaccionar rápido (n pequeño) pesa más que suavizar el ruido (n grande).</p>
+        </section>
+
+        <!-- TAB 6 -->
+        <section id="tab-6" class="tab-content">
+            <h3>6. Suavización exponencial simple</h3>
+            
+            <h4>6.1 Tabla Completa de Pronósticos para valores de α (Periodos 1 a 30)</h4>
+            <div class="table-container"><table class="styled-table" id="table-ses"></table></div>
+
+            <h4>6.2 Cálculo de errores por α</h4>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead><tr><th>α</th><th>Ajuste (2-24): ME</th><th>MAD</th><th>MSE (millones)</th><th>MAPE</th><th>Validación (25-30): MAPE</th></tr></thead>
+                    <tbody>
+                        <tr><td>α = 0,1</td><td>55.684</td><td>55.684</td><td>5.054</td><td>23,8%</td><td>55,2%</td></tr>
+                        <tr><td>α = 0,3</td><td>25.218</td><td>28.498</td><td>1.614</td><td>12,8%</td><td>35,3%</td></tr>
+                        <tr><td>α = 0,5</td><td>15.688</td><td>20.810</td><td>928</td><td>9,7%</td><td>26,3%</td></tr>
+                        <tr><td>α = 0,7</td><td>11.578</td><td>18.515</td><td>662</td><td>9,0%</td><td>23,1%</td></tr>
+                        <tr><td>α = 0,9</td><td>9.304</td><td>17.400</td><td>547</td><td>8,8%</td><td>20,7%</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>6.3 Gráficos comparativos de Alfas</h4>
+            <div class="chart-container"><canvas id="chart-ses"></canvas></div>
+
+            <h4>6.4 Selección y justificación del α óptimo</h4>
+            <p>El α óptimo es 0,9: tiene el menor error en las cuatro métricas de ajuste y también en la validación (20,7%). El error disminuye al aumentar α porque la serie crece de forma sostenida. Un α bajo recuerda demasiado el pasado. Con α = 0,9 el pesado recae casi todo sobre el dato más reciente y el ME baja a 9.304.</p>
+        </section>
+
+        <!-- TAB 7 -->
+        <section id="tab-7" class="tab-content">
+            <h3>7. Suavización exponencial doble (Holt)</h3>
+            
+            <h4>7.1 Tabla Completa de Pronósticos por Combinaciones (Periodos 1 a 30)</h4>
+            <div class="table-container"><table class="styled-table" id="table-holt"></table></div>
+
+            <h4>7.2 Errores por combinación de parámetros</h4>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead><tr><th>α</th><th>β</th><th>Perfil</th><th>Ajuste (3-24): ME</th><th>MAD</th><th>MSE (millones)</th><th>MAPE</th><th>Valid. (25-30): MAPE</th></tr></thead>
+                    <tbody>
+                        <tr><td>0,2</td><td>0,1</td><td>Conservador</td><td>17.371</td><td>29.945</td><td>1.723</td><td>13,2%</td><td>33,3%</td></tr>
+                        <tr><td>0,3</td><td>0,2</td><td>Moderado</td><td>2.934</td><td>27.267</td><td>1.398</td><td>12,3%</td><td>25,7%</td></tr>
+                        <tr><td>0,5</td><td>0,3</td><td>Balanceado</td><td>65</td><td>22.500</td><td>904</td><td>10,7%</td><td>21,9%</td></tr>
+                        <tr><td>0,7</td><td>0,5</td><td>Agresivo</td><td>1.236</td><td>20.576</td><td>598</td><td>10,1%</td><td>18,9%</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>7.3 Gráficos con todas las combinaciones</h4>
+            <div class="chart-container"><canvas id="chart-holt"></canvas></div>
+
+            <h4>7.4 Selección de la combinación óptima</h4>
+            <p>Se selecciona α = 0,7 y β = 0,5: tiene el menor error en MAPE (10,1%), MAD (20.576) y MSE (598 millones), con un sesgo bajo (ME de 1.236), y también la mejor validación de las cuatro (MAPE de 18,9%). El error disminuye al aumentar α y β porque el modelo debe adaptarse rápido en nivel y pendiente a una serie que crece de forma sostenida.</p>
+        </section>
+
+        <!-- TAB 8 -->
+        <section id="tab-8" class="tab-content">
+            <h3>8. Pronóstico con regresión lineal</h3>
+            
+            <h4>8.1 Ecuación de regresión estimada</h4>
+            <p><strong>Ŷ(t) = 72.217 + 9.963 · t</strong><br>
+            β₀ = 72.217: valor esperado de las ventas en t = 0, es decir, el punto de partida de la recta.<br>
+            β₁ = 9.963: las ventas aumentan, en promedio, unos 9.963 miles de pesos por mes.</p>
+            
+            <h4>8.2 Coeficiente de determinación R² e interpretación</h4>
+            <p>R² = 0,827 (R² ajustado de 0,819; error típico de 32.981). La recta explica el 82,7% de la variabilidad de las ventas.</p>
+            
+            <h4>8.3 Tabla Completa de Pronósticos (Periodos 1 a 30)</h4>
+            <div class="table-container"><table class="styled-table" id="table-regresion"></table></div>
+
+            <h4>8.4 Gráfico con línea de tendencia</h4>
+            <div class="chart-container"><canvas id="chart-regresion"></canvas></div>
+
+            <h4>8.5 Análisis de residuos</h4>
+            <p>Los residuos no son independientes: son positivos en los periodos 1 a 4 y 14 a 20, y negativos en los periodos 7 a 13 y 21 a 24. Ese patrón en forma de ola indica que el crecimiento no es lineal y que la estacionalidad no está modelada. Por eso la recta resume bien la tendencia general, pero es un pronóstico poco confiable a largo plazo.</p>
+        </section>
+
+        <!-- TAB 9 -->
+        <section id="tab-9" class="tab-content">
+            <h3>9. Pronóstico con ARIMA(1,1,1)</h3>
+            
+            <h4>9.1 Procedimiento</h4>
+            <ul>
+                <li><strong>Diferenciación:</strong> ΔY(t) = Y(t) − Y(t−1). La serie original no es estacionaria y la diferenciada sí.</li>
+                <li><strong>Identificación:</strong> la ACF de la serie diferenciada es baja en el rezago 1 y relevante en los rezagos 2 y 7.</li>
+                <li><strong>Estimación:</strong> de los parámetros φ₁ y θ₁.</li>
+                <li><strong>Validación:</strong> pruebas sobre los residuos.</li>
+            </ul>
+
+            <h4>9.2 Parámetros estimados</h4>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead><tr><th>Parámetro</th><th>Valor</th></tr></thead>
+                    <tbody>
+                        <tr><td>φ₁ (autorregresivo)</td><td>0,995</td></tr>
+                        <tr><td>θ₁ (media móvil)</td><td>-0,975</td></tr>
+                        <tr><td>σ (desviación del error)</td><td>23.624</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>9.3 Pruebas de validación de residuos</h4>
+            <p>Los residuos son normales, pero no son ruido blanco: la prueba de Ljung-Box lo rechaza. Es lo esperado, porque la serie tiene una estacionalidad de ±25% que ARIMA(1,1,1) no incluye.</p>
+
+            <h4>9.4 Tabla Completa de Pronósticos (Periodos 1 a 30)</h4>
+            <div class="table-container"><table class="styled-table" id="table-arima"></table></div>
+            <div class="chart-container"><canvas id="chart-arima"></canvas></div>
+
+            <h4>9.5 Análisis comparativo con los métodos anteriores</h4>
+            <p>En los periodos 13 a 24, ARIMA obtiene el menor error en MAPE (8,2%), MAD (20.606) y MSE (747 millones). La ventaja sobre el último valor es de menos de 0,3 puntos de MAPE, coherente con la cancelación de φ₁ y θ₁. En la validación, su MAPE (19,5%) queda segundo, detrás de Holt (18,9%).</p>
+        </section>
+
+        <!-- TAB 10 -->
+        <section id="tab-10" class="tab-content">
+            <h3>10. Validación mediante métricas de error</h3>
+            
+            <h4>10.1 Tabla completa de métricas de error</h4>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead><tr><th>Método</th><th>MAPE (13-24)</th><th>MSE (13-24)</th><th>MAD (13-24)</th><th>ME (13-24)</th><th>MAPE (25-30)</th></tr></thead>
+                    <tbody>
+                        <tr><td>ARIMA(1,1,1)</td><td>8,2%</td><td>747</td><td>20.606</td><td>8.689</td><td>19,5%</td></tr>
+                        <tr><td>Holt (α=0,7; β=0,5)</td><td>10,1%</td><td>878</td><td>26.290</td><td>-169</td><td>18,9%</td></tr>
+                        <tr><td>Último valor</td><td>8,4%</td><td>776</td><td>21.393</td><td>11.346</td><td>19,7%</td></tr>
+                        <tr><td>Suavización exp. (α=0,9)</td><td>8,9%</td><td>834</td><td>22.539</td><td>12.644</td><td>20,7%</td></tr>
+                        <tr><td>Promedio móvil (n=3)</td><td>12,9%</td><td>1.844</td><td>32.669</td><td>22.917</td><td>27,4%</td></tr>
+                        <tr><td>Regresión lineal</td><td>12,3%</td><td>1.272</td><td>33.136</td><td>11.961</td><td>50,3%</td></tr>
+                        <tr><td>Promedio simple</td><td>39,0%</td><td>11.933</td><td>105.702</td><td>105.702</td><td>66,5%</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>10.2 Ranking de métodos</h4>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead><tr><th>Posición</th><th>Método</th><th>Posición promedio</th><th>Mejor en</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td>ARIMA(1,1,1)</td><td>1,63</td><td>MAPE (13-24), MAD (13-24), MSE (13-24)</td></tr>
+                        <tr><td>2</td><td>Holt (α=0,7; β=0,5)</td><td>2,13</td><td>ME (13-24), MAPE (25-30), MAD (25-30), MSE (25-30), ME (25-30)</td></tr>
+                        <tr><td>3</td><td>Último valor</td><td>2,63</td><td>—</td></tr>
+                        <tr><td>4</td><td>Suavización exp. (α=0,9)</td><td>3,75</td><td>—</td></tr>
+                        <tr><td>5</td><td>Promedio móvil (n=3)</td><td>5,38</td><td>—</td></tr>
+                        <tr><td>6</td><td>Regresión lineal</td><td>5,50</td><td>—</td></tr>
+                        <tr><td>7</td><td>Promedio simple</td><td>7,00</td><td>—</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>10.3 Selección del método óptimo global</h4>
+            <p>El método óptimo es ARIMA(1,1,1): es el mejor en MAPE, MAD y MSE del ajuste (periodos 13 a 24), el segundo en la validación, y el de mejor posición promedio (1,63 de 7). Le siguen Holt (2,13), que es el mejor en la validación y en sesgo, y el último valor (2,63).</p>
+
+            <h4>10.4 Justificación técnica y gerencial</h4>
+            <p><strong>Justificación técnica.</strong> ARIMA modela la serie diferenciada y aprovecha su autocorrelación, por lo que sigue bien los cambios de nivel sin el rezago de los promedios; Holt se adapta mejor a cambios bruscos porque corrige la tendencia con cada dato.</p>
+            <p><strong>Justificación gerencial.</strong> Todos los métodos subestimaron las ventas (ME positivo en todos), porque estas subieron 77,0% entre el periodo 24 y el 25 y siguieron creciendo. El error de subestimación es el más caro, por ende se debe adoptar un buffer de seguridad.</p>
+
+            <h4>10.5 Pronósticos Comparativos vs Ventas reales (Todos los modelos)</h4>
+            <div class="chart-container"><canvas id="chart-todas"></canvas></div>
+
+            <h4>10.6 Verificación de las hipótesis</h4>
+            <ul>
+                <li>La serie de ventas del Grupo 4 tiene una tendencia creciente fuerte, una estacionalidad de ±25% y un cambio de ritmo muy marcado a partir del periodo 25.</li>
+                <li>Los métodos sin tendencia (promedio simple, promedios móviles largos) y la regresión lineal sin actualización tienen errores altos por rezago.</li>
+                <li>Ningún método modela la estacionalidad, que es la mejora más importante para una siguiente etapa.</li>
+            </ul>
+        </section>
+
+        <!-- TAB 11 -->
+        <section id="tab-11" class="tab-content">
+            <h3>11. Comparación Excel vs Inteligencia Artificial</h3>
+            
+            <h4>11.1 Análisis de Diferencias en Resultados</h4>
+            <p>La aplicación paralela de métodos heurísticos tradicionales (mediante Microsoft Excel) y modelos algorítmicos avanzados (mediante Inteligencia Artificial y Python) sobre la serie de tiempo de Agroindustrias del Tolima S.A.S. revela divergencias profundas en la capacidad de adaptación matemática de cada herramienta.</p>
+            <p>En la fase de ajuste, los métodos tradicionales configurados en Excel, particularmente Holt, demostraron un desempeño sobresaliente (MAPE del 10,1%). Sin embargo, el modelo ARIMA (1,1,1) ejecutado mediante IA superó este rendimiento (MAPE del 8,2%). La diferencia fundamental radica en que la IA no requirió iteraciones manuales para encontrar los pesos óptimos. En la ventana de validación, los modelos de Excel basados en medias históricas colapsaron estadísticamente.</p>
+            
+            <h4>11.2 Tabla de Fortalezas y Debilidades</h4>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead><tr><th>Criterio de Evaluación</th><th>Herramientas Tradicionales (Microsoft Excel)</th><th>Inteligencia Artificial y Lenguajes (Python/R)</th></tr></thead>
+                    <tbody>
+                        <tr><td>Fortaleza: Transparencia</td><td>Alta ("Caja Blanca"): Permite auditar cada cálculo celda a celda.</td><td>Baja ("Caja Negra"): Los hiperparámetros son abstractos.</td></tr>
+                        <tr><td>Fortaleza: Curva de Aprendizaje</td><td>Rápida: Interfaz gráfica intuitiva.</td><td>Pronunciada: Requiere competencias en programación.</td></tr>
+                        <tr><td>Fortaleza: Modelado de Complejidad</td><td>Limitada: Requiere fórmulas complejas para aislar estacionalidad.</td><td>Superior: Captura automáticamente tendencias, estacionalidad, etc.</td></tr>
+                        <tr><td>Debilidad: Escalabilidad</td><td>Crítica: Sufre ralentización al superar miles de filas.</td><td>Inexistente: Procesa millones de registros en segundos.</td></tr>
+                        <tr><td>Debilidad: Automatización</td><td>Manual: Actualización requiere intervención constante.</td><td>Dinámica: Se conecta a BBDD y reentrena automáticamente.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>11.3 Recomendación de Flujo de Trabajo Híbrido</h4>
+            <ul>
+                <li><strong>Fase 1: Ingesta y Limpieza de Datos:</strong> Excel con Power Query como motor ETL.</li>
+                <li><strong>Fase 2: Motor de Pronóstico:</strong> Exportar datos limpios a Python/IA (SARIMA).</li>
+                <li><strong>Fase 3: Visualización:</strong> Conectar resultados tabulares a Power BI para el dashboard directivo interactivo.</li>
+            </ul>
+
+            <h4>11.4 Reflexión sobre el Futuro de la Analítica de Datos</h4>
+            <p>El valor del profesional del futuro radica en formular las preguntas correctas al modelo algorítmico, auditar críticamente sus residuos estadísticos, identificar cuándo un modelo matemático está ignorando variables exógenas, y traducir el dato crudo en una decisión gerencial accionable.</p>
+        </section>
+
+        
+        <!-- TAB 12 -->
+        <section id="tab-12" class="tab-content">
+            <h3>12. Recomendaciones Gerenciales y Plan de Acción</h3>
+            
+            <h4>12.1 Resumen ejecutivo</h4>
+            <p><strong>El problema.</strong> La empresa produce sin una visión confiable de la demanda: en los meses de poca venta se acumula inventario (con un costo de almacenamiento del 8% del valor del producto) y en los meses de mucha venta falta producto (con una pérdida estimada del 15% de las ventas). El Consejo necesita saber qué esperar en los próximos 6 meses para planificar producción, compras y financiación.</p>
+            <p><strong>Qué hicimos.</strong> Analizamos 24 meses de ventas y comparamos siete métodos de pronóstico, desde los más simples hasta modelos avanzados (ARIMA y Holt). Probamos cada uno contra los datos históricos y contra los 6 meses siguientes, cuyas ventas reales ya conocemos.</p>
+            <p><strong>Qué encontramos.</strong></p>
+            <ul>
+                <li>Las ventas mensuales crecieron 191,5% en 24 meses: de $102 a $298 millones. El crecimiento se aceleró entre los meses 12 y 17 y luego se estabilizó.</li>
+                <li>El mejor método es ARIMA, con un error típico del 8% mensual en el ajuste; Holt es el que mejor reacciona cuando las ventas cambian de ritmo. Los métodos sin tendencia (promedio simple, promedios móviles) fallan en 13% a 39%.</li>
+                <li>Con los datos hasta el mes 24, el pronóstico base para el mes 25 era de $301 millones. Las ventas reales fueron de $527 millones, un 75,3% más: todos los métodos subestimaron.</li>
+                <li>Al cierre del mes 24, el inventario ($781 millones) equivale a 2,6 meses de ventas, frente a un promedio de 1,9 meses: hay un exceso de inventario justo antes de un salto de demanda.</li>
+            </ul>
+            <p><strong>Recomendación clave.</strong> No decidir con un solo número, sino con tres escenarios (conservador, base y optimista) que se actualizan cada mes con las ventas reales; mantener un margen de seguridad moderado en producción; ajustar el inventario de forma gradual y condicionada; y activar un sistema de alertas que avise cuando las ventas se salgan del rango esperado.</p>
+
+            <h4>12.2 Análisis de situación</h4>
+            <p><strong>Estado actual.</strong> En los últimos 6 meses (19 a 24) la empresa vendió $1.651 millones, con ventas mensuales estables entre $243 y $298 millones. Los costos de producción representan en promedio el 60,4% de las ventas y los gastos administrativos el 12,1%, de modo que el margen operativo antes de inventarios y ventas perdidas ronda el 27,5%.</p>
+            
+            <p><strong>Tendencias identificadas:</strong></p>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead><tr><th>Tendencia</th><th>Qué significa para el negocio</th></tr></thead>
+                    <tbody>
+                        <tr><td>Crecimiento sostenido</td><td>Las ventas suben en promedio unos $10 millones cada mes; el negocio crece, pero la planificación debe crecer con él.</td></tr>
+                        <tr><td>Estacionalidad de ±25%</td><td>Hay meses de ventas 25% por encima y 25% por debajo de la tendencia; es la causa del exceso y la falta de inventario.</td></tr>
+                        <tr><td>Cambios de ritmo bruscos</td><td>Entre los meses 12 y 17 las ventas subieron 82%, y en el mes 25 saltaron 77%: los promedios simples no los detectan a tiempo.</td></tr>
+                        <tr><td>Inventario alto</td><td>El inventario al cierre del mes 24 cubre 2,6 meses de ventas, por encima del promedio de 1,9.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p><strong>Riesgos y oportunidades:</strong></p>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead><tr><th>Riesgos</th><th>Oportunidades</th></tr></thead>
+                    <tbody>
+                        <tr><td>Subestimar la demanda: todos los métodos se quedaron cortos en los meses 25 a 30; riesgo de ventas perdidas.</td><td>Pronóstico mensual con escenarios: convierte la incertidumbre en un rango manejable.</td></tr>
+                        <tr><td>Exceso de inventario: capital inmovilizado y costo de almacenamiento.</td><td>Liberar capital de trabajo: llevar el inventario cerca de su cobertura normal libera cerca de $220 millones.</td></tr>
+                        <tr><td>Volatilidad de materias primas que encarece las compras en meses pico.</td><td>Compras anticipadas y acuerdos con proveedores para los meses de mayor venta.</td></tr>
+                        <tr><td>Pronósticos que no ven la estacionalidad: error persistente en meses pico y valle.</td><td>Modelos con estacionalidad: la mayor mejora de precisión disponible.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>12.3 Pronósticos detallados (meses 25 a 30)</h4>
+            <p>El pronóstico central usa el modelo ARIMA, el de mejor desempeño en los datos históricos. Para no depender de un único número se presentan tres escenarios: conservador (las ventas se mantienen en su último nivel), base (ARIMA) y optimista (la tendencia reciente continúa, modelo de Holt). Cifras en millones de pesos.</p>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead><tr><th>Escenario</th><th>Mes 25</th><th>Mes 26</th><th>Mes 27</th><th>Mes 28</th><th>Mes 29</th><th>Mes 30</th><th>Total 6 meses</th></tr></thead>
+                    <tbody>
+                        <tr><td>Conservador</td><td>$298</td><td>$298</td><td>$298</td><td>$298</td><td>$298</td><td>$298</td><td>$1.786</td></tr>
+                        <tr><td>Base (ARIMA)</td><td>$301</td><td>$304</td><td>$307</td><td>$310</td><td>$313</td><td>$316</td><td>$1.849</td></tr>
+                        <tr><td>Optimista (Holt)</td><td>$298</td><td>$308</td><td>$319</td><td>$330</td><td>$341</td><td>$352</td><td>$1.948</td></tr>
+                        <tr><td>Rango probable base (95%)</td><td>254 – 347</td><td>238 – 370</td><td>225 – 388</td><td>214 – 405</td><td>205 – 420</td><td>196 – 435</td><td>—</td></tr>
+                        <tr><td>Ventas reales (validación)</td><td>$527</td><td>$581</td><td>$761</td><td>$801</td><td>$707</td><td>$922</td><td>$4.299</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>12.4 Impacto financiero</h4>
+            <p>Con los márgenes históricos (costos de producción 60,4% y gastos administrativos 12,1% de las ventas), la proyección de los 6 meses en cada escenario es la siguiente (millones de pesos):</p>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead><tr><th>Escenario</th><th>Ingresos</th><th>Costos de producción</th><th>Gastos administrativos</th><th>Utilidad operativa</th></tr></thead>
+                    <tbody>
+                        <tr><td>Últimos 6 meses (19-24, real)</td><td>$1.651</td><td>-$997</td><td>-$200</td><td>$454</td></tr>
+                        <tr><td>Conservador</td><td>$1.786</td><td>-$1.078</td><td>-$217</td><td>$491</td></tr>
+                        <tr><td>Base (ARIMA)</td><td>$1.849</td><td>-$1.116</td><td>-$224</td><td>$508</td></tr>
+                        <tr><td>Optimista (Holt)</td><td>$1.948</td><td>-$1.176</td><td>-$236</td><td>$536</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <p><strong>Necesidades de financiamiento:</strong></p>
+            <ul>
+                <li><strong>Escenarios conservador, base y optimista:</strong> no se requiere financiación adicional. Con una cobertura normal de 1,9 meses, el inventario necesario en el mes 25 sería de unos $558 millones, menos que los $781 actuales: hay cerca de $223 millones de capital inmovilizado de más.</li>
+                <li><strong>Escenario de estrés (ventas como las del mes 25, $527 millones):</strong> el inventario necesario sería de unos $978 millones, es decir, cerca de $197 millones adicionales de capital de trabajo. Se recomienda tener una línea de crédito rotativa contingente de ese orden.</li>
+                <li><strong>Costos de falla, en pesos:</strong> con el inventario actual, un costo de almacenamiento del 8% equivale a unos $62 millones (si el porcentaje fuera mensual), y un mes de desabastecimiento del 15% de las ventas base, a unos $45 millones. Son del mismo orden, por lo que conviene un margen de seguridad moderado y no un exceso de inventario.</li>
+            </ul>
+
+            <h4>12.5 Plan de acción</h4>
+            <p><strong>Acciones inmediatas (0 a 30 días):</strong></p>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead><tr><th>Acción</th><th>Responsable</th><th>Resultado esperado</th></tr></thead>
+                    <tbody>
+                        <tr><td>Adoptar los tres escenarios (conservador, base, optimista) como insumo del plan mensual de producción y compras.</td><td>Gerencia general y Producción</td><td>Decisiones basadas en un rango, no en un solo número.</td></tr>
+                        <tr><td>Planificar la producción con un margen de seguridad de cerca del 10% sobre el escenario base (equivale al error típico del modelo).</td><td>Producción</td><td>Menos ventas perdidas sin inflar el inventario.</td></tr>
+                        <tr><td>No cortar el inventario de golpe: bajarlo de forma gradual hacia 2,0 a 2,2 meses de ventas, solo mientras las ventas se mantengan dentro del rango esperado.</td><td>Producción y Finanzas</td><td>Liberar capital sin exponerse a faltantes.</td></tr>
+                        <tr><td>Activar las alertas del plan de monitoreo (sección 6).</td><td>Finanzas</td><td>Detección temprana de desviaciones.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p><strong>Ajustes operativos (1 a 3 meses):</strong></p>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead><tr><th>Acción</th><th>Responsable</th><th>Resultado esperado</th></tr></thead>
+                    <tbody>
+                        <tr><td>Actualizar el pronóstico cada mes con las ventas reales y volver a estimar el modelo cada trimestre.</td><td>Analítica / Finanzas</td><td>Errores menores mes a mes.</td></tr>
+                        <tr><td>Incorporar la estacionalidad (factores mensuales o modelo SARIMA).</td><td>Analítica</td><td>Mejor precisión en los meses pico y valle.</td></tr>
+                        <tr><td>Comprar con anticipación las materias primas de los meses de mayor venta y negociar flexibilidad de ±20% con proveedores.</td><td>Compras</td><td>Protección frente a la volatilidad de precios.</td></tr>
+                        <tr><td>Definir un plan de turnos y capacidad extra para los meses en los que las ventas superen el escenario optimista.</td><td>Producción</td><td>Capacidad de respuesta ante saltos de demanda.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p><strong>Decisiones de inversión (3 a 6 meses):</strong></p>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead><tr><th>Decisión</th><th>Responsable</th><th>Resultado esperado</th></tr></thead>
+                    <tbody>
+                        <tr><td>Línea de crédito rotativa contingente de unos $197 millones para capital de trabajo.</td><td>Finanzas</td><td>Financiar un salto de demanda sin frenar la producción.</td></tr>
+                        <tr><td>Capacidad de producción y almacenamiento flexible (turnos, bodegas por temporada) antes de comprar capacidad fija.</td><td>Gerencia general</td><td>Crecer sin sobredimensionar la planta.</td></tr>
+                        <tr><td>Implementar un tablero de control con pronósticos y KPIs, y capacitar al equipo en herramientas de analítica.</td><td>Analítica / TI</td><td>Seguimiento continuo y decisiones más rápidas.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>12.6 Plan de monitoreo</h4>
+            <p><strong>Indicadores clave (KPIs):</strong></p>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead><tr><th>Indicador</th><th>Meta</th><th>Frecuencia</th><th>Señal de alerta</th></tr></thead>
+                    <tbody>
+                        <tr><td>Error del pronóstico (MAPE de los últimos 3 meses)</td><td>≤ 10%</td><td>Mensual</td><td>> 15%</td></tr>
+                        <tr><td>Sesgo del pronóstico (error promedio / ventas)</td><td>Entre −5% y +5%</td><td>Mensual</td><td>Subestima más del 10% dos meses seguidos</td></tr>
+                        <tr><td>Ventas reales frente al rango probable (95%)</td><td>Dentro del rango</td><td>Mensual</td><td>Fuera del rango 1 mes (aviso) o 2 meses (alerta)</td></tr>
+                        <tr><td>Cobertura de inventario (meses de ventas)</td><td>1,9 a 2,2</td><td>Semanal</td><td>> 2,5 o < 1,5</td></tr>
+                        <tr><td>Nivel de servicio (pedidos atendidos / pedidos recibidos)</td><td>≥ 95%</td><td>Semanal</td><td>< 90%</td></tr>
+                        <tr><td>Costo de almacenamiento (% del valor del inventario)</td><td>≤ 8%</td><td>Mensual</td><td>> 8%</td></tr>
+                        <tr><td>Margen operativo</td><td>≥ 27,5%</td><td>Mensual</td><td>< 25%</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <p><strong>Protocolo de ajuste:</strong></p>
+            <ol>
+                <li><strong>Cierre de mes:</strong> comparar la venta real con el escenario base y con el rango probable, y registrar el error.</li>
+                <li><strong>Aviso (1 mes fuera del rango o error > 15%):</strong> revisar con Comercial si hay causas conocidas (pedidos grandes, promociones, clima) y recalcular los escenarios con el dato nuevo.</li>
+                <li><strong>Alerta (2 meses seguidos fuera del rango):</strong> pasar a planificar con el escenario optimista o conservador según el sentido de la desviación, volver a estimar el modelo y convocar al comité de producción y finanzas.</li>
+                <li><strong>Revisión trimestral:</strong> reevaluar los métodos, los márgenes de seguridad, la cobertura de inventario y las metas de los KPIs.</li>
+            </ol>
+        </section>
+
+
+    </main>
+
+    <footer class="footer">
+        <p>Integrantes: <span class="highlight">Julieth Yesenia Manjarres Caballero</span> y <span class="highlight">Laura Saide Ariza Arevalo</span></p>
+        <p>Docente: <span class="highlight">José Leonardo Montealegre</span></p>
+    </footer>
+
+    <script>
+        function openTab(evt, tabId) {
+            let i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+                tabcontent[i].classList.remove("active");
+            }
+            tablinks = document.getElementsByClassName("tab-btn");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(tabId).style.display = "block";
+            document.getElementById(tabId).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const formatNum = (val) => {
+                if (val === null || val === undefined || isNaN(val)) return '-';
+                return new Intl.NumberFormat('es-CO').format(val);
+            };
+
+            const periodos30 = Array.from({length: 30}, (_, i) => i + 1);
+            const ventas100 = [102119,103438,108069,128059,116039,140923,128537,130703,120702,132498,127548,161530,183968,244697,273359,279705,294386,294786,283250,291502,242754,267457,268351,297683,526976,581091,761440,801368,706995,921626,796336,807080,859878,780198,765126,963530,1405941,1324674,1858540,2084928,1869168,2145218,2137774,1765856,1761777,2017353,1878270,2374475,3520167,3937991,3914166,5066065,6222874,4508304,5515709,5184792,4577991,5109672,5069434,7569191,9468183,8967088,11237333,12910773,12555801,13848597,11509282,12836106,11382777,12073457,14333328,18039369,18373608,26713821,31457182,31718778,38913042,31109492,30573880,31726610,27541837,34807073,35152363,48643083,45906349,56428916,82539468,72334957,94065064,77977540,83590036,85923615,73976864,68113512,82572995,116613144,131736757,168131778,184971121,209366281];
+            const ventas30 = ventas100.slice(0, 30);
+            
+            const ultimo_valor = [null,102119,103438,108069,128059,116039,140923,128537,130703,120702,132498,127548,161530,183968,244697,273359,279705,294386,294786,283250,291502,242754,267457,268351,297683,526976,581091,761440,801368,706995];
+            const prom_simple = [null,102119,102779,104542,110421,111545,116441,118169,119736,119843,121109,121694,125014,129549,137774,146813,155118,163311,170615,176543,182291,185170,188910,192364,196753,209962,224236,244132,264034,279308];
+            const n3 = [null,null,null,104542,113188.67,117389,128340.33,128499.67,133387.67,126647.33,127967.67,126916,140525.33,157682,196731.67,234008,265920.33,282483.33,289625.67,290807.33,289846,272502,267237.67,259520.67,277830.33,364336.67,468583.33,623169,714633,756601];
+            const n6 = [null,null,null,null,null,null,116441.17,120844.17,125388.33,127493.83,128233.67,130151.83,133586.33,142824.83,161823.83,187266.67,211801.17,239607.5,261816.83,278363.83,286164.67,281063.83,279022.5,274683.33,275166.17,315787.17,364052,450499.67,539484.83,612592.17];
+            const n12 = [null,null,null,null,null,null,null,null,null,null,null,null,125013.75,131834.5,143606.08,157380.25,170017.42,184879.67,197701.58,210594.33,223994.25,234165.25,245411.83,257145.42,268491.5,297075.5,325108.33,365781.75,409253.67,443637.75];
+            const ses_01 = [null,102119.0,102250.9,102832.71,105355.34,106423.71,109873.63,111739.97,113636.27,114342.85,116158.36,117297.33,121720.59,127945.33,139620.5,152994.35,165665.42,178537.47,190162.33,199471.09,208674.18,212082.17,217619.65,222692.78,230191.81,259870.23,291992.3,338937.07,385180.17,417361.65];
+            const ses_03 = [null,102119.0,102514.7,104180.99,111344.39,112752.78,121203.84,123403.79,125593.55,124126.09,126637.66,126910.76,137296.53,151297.97,179317.68,207530.08,229182.55,248743.59,262556.31,268764.42,275585.69,265736.18,266252.43,266882.0,276122.3,351378.41,420292.19,522636.53,606255.97,636477.68];
+            const ses_05 = [null,102119.0,102778.5,105423.75,116741.38,116390.19,128656.59,128596.8,129649.9,125175.95,128836.97,128192.49,144861.24,164414.62,204555.81,238957.41,259331.2,276858.6,285822.3,284536.15,288019.08,265386.54,266421.77,267386.38,282534.69,404755.35,492923.17,627181.59,714274.79,710634.9];
+            const ses_07 = [null,102119.0,103042.3,106560.99,121609.6,117710.18,133959.15,130163.65,130541.19,123653.76,129844.73,128237.02,151542.11,174240.23,223559.97,258419.29,273319.29,288065.99,292770.0,286106.0,289883.2,256892.76,264287.73,267132.02,288517.71,455438.51,543395.25,696026.58,769765.57,725826.17];
+            const ses_09 = [null,102119.0,103306.1,107592.71,126012.37,117036.34,138534.33,129536.73,130586.37,121690.44,131417.24,127934.92,158170.49,181388.25,238366.12,269859.71,278720.47,292819.45,294589.34,284383.93,290790.19,247557.62,265467.06,268062.61,294720.96,503750.5,573356.95,742631.7,795494.37,715844.94];
+            const holt_c = [null,103438,104757,106804.64,112865.84,115374.26,122868.77,126500.55,129923.22,130476.73,133319.16,134487.69,142759.75,154689.17,178178.66,204606.26,228519.51,251903.65,271548.6,285191.39,297882.24,297182.75,300969.24,303524.87,311318.94,367725.93,427941.83,518854.31,605220.17,657473.75];
+            const holt_m = [null,103438,104757,107268.32,116270.68,118952.44,129613.1,133295.2,136366.93,134576.95,136738.03,136214.38,147561.36,164420.05,199256.45,236686.68,267372.74,294878.08,314246.29,322483.46,328866.19,313542.97,307462.46,301127.62,305286.15,390286.41,477469.37,609640.38,725642.14,777412.65];
+            const holt_b = [null,103438,104757,108228.8,122934.23,123242.66,138490.93,138428.97,138322.1,130625.15,132955.6,130834.68,151369.53,177745.72,231341.01,278772.35,305800.92,324943.46,330191.12,320005.78,314763.54,276966.99,268993.72,265357.67,283054.45,443137.57,570929.65,753576.74,872032.97,859318.89];
+            const holt_a = [null,103438,104757,109553.6,131462.47,124222.92,145314.88,137100.01,133912.8,121332.15,129723.21,128014.2,163019.43,196559.6,265980.04,309452.21,316524.54,321174.45,313613.46,292642.76,291728.68,240189.72,251563.68,261477.23,297655.71,549276.46,673778.27,868054.72,930946.9,805370.29];
+            const regresion = [82180,92143,102106,112069,122032,131994,141957,151920,161883,171846,181809,191772,201735,211698,221661,231623,241586,251549,261512,271475,281438,291401,301364,311327,321290,331252,341215,351178,361141,371104];
+            const arima = [102119,102119,103464,108187,128574,116301,141676,129023,131221,121007,133031,127969,162620,185479,247385,276553,282946,297840,298161,286310,294651,244849,269994,270842,300699,528845,582690,762137,801865,707964];
+
+            // Construir tablas dinámicamente inyectando filas y celdas
+            function buildTable(tableId, headers, dataRows) {
+                const table = document.getElementById(tableId);
+                if(!table) return; // Evitar error si no encuentra el ID
+                let html = '<thead><tr>';
+                headers.forEach(h => html += `<th>${h}</th>`);
+                html += '</tr></thead><tbody>';
+                dataRows.forEach(row => {
+                    html += '<tr>';
+                    row.forEach(cell => {
+                        if (cell === null || cell === undefined) {
+                            html += '<td>-</td>';
+                        } else if (typeof cell === 'number') {
+                            html += `<td>${formatNum(cell)}</td>`;
+                        } else {
+                            html += `<td>${cell}</td>`;
+                        }
+                    });
+                    html += '</tr>';
+                });
+                html += '</tbody>';
+                table.innerHTML = html;
+            }
+
+            // Ejecutar la construcción de todas las tablas
+            buildTable('tabla-100-periodos', ['Periodo', 'Ventas (Miles de Pesos)'], Array.from({length: 100}, (_, i) => [i+1, ventas100[i]]));
+            buildTable('table-ultimo-valor', ['Periodo', 'Ventas reales', 'Pronóstico (Último Valor)', 'Error'], periodos30.map(i => [i, ventas30[i-1], ultimo_valor[i-1], ultimo_valor[i-1] ? ventas30[i-1] - ultimo_valor[i-1] : null]));
+            buildTable('table-prom-simple', ['Periodo', 'Ventas reales', 'Pronóstico (Promedio Simple)', 'Error'], periodos30.map(i => [i, ventas30[i-1], prom_simple[i-1], prom_simple[i-1] ? ventas30[i-1] - prom_simple[i-1] : null]));
+            buildTable('table-movil', ['Periodo', 'Ventas', 'n=3', 'Error n=3', 'n=6', 'Error n=6', 'n=12', 'Error n=12'], periodos30.map(i => [i, ventas30[i-1], n3[i-1], (n3[i-1] ? ventas30[i-1]-n3[i-1] : null), n6[i-1], (n6[i-1] ? ventas30[i-1]-n6[i-1] : null), n12[i-1], (n12[i-1] ? ventas30[i-1]-n12[i-1] : null)]));
+            buildTable('table-ses', ['Periodo', 'Ventas', 'α=0.1', 'Err 0.1', 'α=0.3', 'Err 0.3', 'α=0.5', 'Err 0.5', 'α=0.7', 'Err 0.7', 'α=0.9', 'Err 0.9'], periodos30.map(i => [i, ventas30[i-1], ses_01[i-1], (ses_01[i-1] ? ventas30[i-1]-ses_01[i-1] : null), ses_03[i-1], (ses_03[i-1] ? ventas30[i-1]-ses_03[i-1] : null), ses_05[i-1], (ses_05[i-1] ? ventas30[i-1]-ses_05[i-1] : null), ses_07[i-1], (ses_07[i-1] ? ventas30[i-1]-ses_07[i-1] : null), ses_09[i-1], (ses_09[i-1] ? ventas30[i-1]-ses_09[i-1] : null)]));
+            buildTable('table-holt', ['Periodo', 'Ventas', 'Conserv.', 'Err Cons.', 'Moderado', 'Err Mod.', 'Balanceado', 'Err Bal.', 'Agresivo', 'Err Agr.'], periodos30.map(i => [i, ventas30[i-1], holt_c[i-1], (holt_c[i-1] ? ventas30[i-1]-holt_c[i-1] : null), holt_m[i-1], (holt_m[i-1] ? ventas30[i-1]-holt_m[i-1] : null), holt_b[i-1], (holt_b[i-1] ? ventas30[i-1]-holt_b[i-1] : null), holt_a[i-1], (holt_a[i-1] ? ventas30[i-1]-holt_a[i-1] : null)]));
+            buildTable('table-regresion', ['Periodo', 'Ventas reales', 'Pronóstico (Regresión)', 'Error'], periodos30.map(i => [i, ventas30[i-1], regresion[i-1], regresion[i-1] ? ventas30[i-1] - regresion[i-1] : null]));
+            buildTable('table-arima', ['Periodo', 'Ventas reales', 'Pronóstico (ARIMA)', 'Error'], periodos30.map(i => [i, ventas30[i-1], arima[i-1], arima[i-1] ? ventas30[i-1] - arima[i-1] : null]));
+            buildTable('tabla-anexo-a', ['Per.', 'Ventas', 'Último valor', 'Prom. simple', 'MA n=3', 'SES α=0.9', 'Holt (Agresivo)', 'Regres.', 'ARIMA'], periodos30.map(i => [i, ventas30[i-1], ultimo_valor[i-1], prom_simple[i-1], n3[i-1], ses_09[i-1], holt_a[i-1], regresion[i-1], arima[i-1]]));
+
+            // Configuración general de gráficas Chart.js
+            Chart.defaults.font.family = 'Montserrat';
+            Chart.defaults.color = '#2c3e50';
+
+            const chartOptions = (titleY) => ({
+                responsive: true,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    zoom: {
+                        zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' },
+                        pan: { enabled: true, mode: 'x' }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) { label += ': '; }
+                                if (context.parsed.y !== null) {
+                                    label += new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(context.parsed.y);
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Periodo (mes)' }, grid: { color: 'rgba(200,200,200,0.2)' } },
+                    y: { title: { display: true, text: titleY }, grid: { color: 'rgba(200,200,200,0.2)' } }
+                }
+            });
+
+            // 1. Gráfica 100 periodos
+            new Chart(document.getElementById('chart-100'), {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 100}, (_, i) => i + 1),
+                    datasets: [{
+                        label: 'Ventas Simuladas (100 Periodos)',
+                        data: ventas100,
+                        borderColor: '#b76e79',
+                        backgroundColor: 'rgba(183, 110, 121, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 1
+                    }]
+                },
+                options: chartOptions('Miles de Pesos')
+            });
+
+            // 2. Gráfica Último Valor
+            new Chart(document.getElementById('chart-ultimo-valor'), {
+                type: 'line',
+                data: {
+                    labels: periodos30,
+                    datasets: [
+                        { label: 'Ventas reales', data: ventas30, borderColor: '#2c3e50', backgroundColor: '#2c3e50', tension: 0.1, borderWidth: 3 },
+                        { label: 'Pronóstico (Último Valor)', data: ultimo_valor, borderColor: '#d4a5a5', backgroundColor: '#d4a5a5', borderDash: [5, 5], tension: 0.1 }
+                    ]
+                },
+                options: chartOptions('Miles de Pesos')
+            });
+
+            // 3. Gráfica Promedio Simple
+            new Chart(document.getElementById('chart-promedio-simple'), {
+                type: 'line',
+                data: {
+                    labels: periodos30,
+                    datasets: [
+                        { label: 'Ventas reales', data: ventas30, borderColor: '#2c3e50', backgroundColor: '#2c3e50', tension: 0.1, borderWidth: 3 },
+                        { label: 'Pronóstico (Promedio Simple)', data: prom_simple, borderColor: '#e69a8d', backgroundColor: '#e69a8d', tension: 0.1 }
+                    ]
+                },
+                options: chartOptions('Miles de Pesos')
+            });
+
+            // 4. Gráfica Promedios Móviles
+            new Chart(document.getElementById('chart-promedio-movil'), {
+                type: 'line',
+                data: {
+                    labels: periodos30,
+                    datasets: [
+                        { label: 'Ventas reales', data: ventas30, borderColor: '#2c3e50', backgroundColor: '#2c3e50', tension: 0.1, borderWidth: 3 },
+                        { label: 'Promedio Móvil n=3', data: n3, borderColor: '#b76e79', backgroundColor: '#b76e79', tension: 0.3 },
+                        { label: 'Promedio Móvil n=6', data: n6, borderColor: '#7395ae', backgroundColor: '#7395ae', tension: 0.3, borderDash: [5, 5] },
+                        { label: 'Promedio Móvil n=12', data: n12, borderColor: '#557a95', backgroundColor: '#557a95', tension: 0.3, borderDash: [2, 2] }
+                    ]
+                },
+                options: chartOptions('Miles de Pesos')
+            });
+
+            // 5. Gráfica SES (Múltiples Alfas)
+            new Chart(document.getElementById('chart-ses'), {
+                type: 'line',
+                data: {
+                    labels: periodos30,
+                    datasets: [
+                        { label: 'Ventas reales', data: ventas30, borderColor: '#2c3e50', backgroundColor: '#2c3e50', tension: 0.1, borderWidth: 3 },
+                        { label: 'SES (α=0.1)', data: ses_01, borderColor: '#e8c1c5', tension: 0.2 },
+                        { label: 'SES (α=0.3)', data: ses_03, borderColor: '#d4a5a5', tension: 0.2 },
+                        { label: 'SES (α=0.5)', data: ses_05, borderColor: '#b76e79', tension: 0.2 },
+                        { label: 'SES (α=0.7)', data: ses_07, borderColor: '#965a63', tension: 0.2 },
+                        { label: 'SES (α=0.9)', data: ses_09, borderColor: '#693c44', tension: 0.2 }
+                    ]
+                },
+                options: chartOptions('Miles de Pesos')
+            });
+
+            // 6. Gráfica Holt (Múltiples Perfiles)
+            new Chart(document.getElementById('chart-holt'), {
+                type: 'line',
+                data: {
+                    labels: periodos30,
+                    datasets: [
+                        { label: 'Ventas reales', data: ventas30, borderColor: '#2c3e50', backgroundColor: '#2c3e50', tension: 0.1, borderWidth: 3 },
+                        { label: 'Conservador', data: holt_c, borderColor: '#a3c4bc', tension: 0.2 },
+                        { label: 'Moderado', data: holt_m, borderColor: '#66827a', tension: 0.2 },
+                        { label: 'Balanceado', data: holt_b, borderColor: '#4a7c59', tension: 0.2 },
+                        { label: 'Agresivo', data: holt_a, borderColor: '#2c4a35', tension: 0.2 }
+                    ]
+                },
+                options: chartOptions('Miles de Pesos')
+            });
+
+            // 7. Gráfica Regresión
+            new Chart(document.getElementById('chart-regresion'), {
+                type: 'line',
+                data: {
+                    labels: periodos30,
+                    datasets: [
+                        { label: 'Ventas reales', data: ventas30, borderColor: '#2c3e50', backgroundColor: 'transparent', pointBackgroundColor: '#2c3e50', type: 'scatter' },
+                        { label: 'Línea de Tendencia', data: regresion, borderColor: '#e08e79', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0 }
+                    ]
+                },
+                options: chartOptions('Miles de Pesos')
+            });
+
+            // 8. Gráfica ARIMA
+            new Chart(document.getElementById('chart-arima'), {
+                type: 'line',
+                data: {
+                    labels: periodos30,
+                    datasets: [
+                        { label: 'Ventas reales', data: ventas30, borderColor: '#2c3e50', backgroundColor: '#2c3e50', tension: 0.1, borderWidth: 3 },
+                        { label: 'ARIMA (1,1,1)', data: arima, borderColor: '#d38b5d', backgroundColor: '#d38b5d', tension: 0.2 }
+                    ]
+                },
+                options: chartOptions('Miles de Pesos')
+            });
+
+            // 9. Gráfica Todos los modelos (Meses 20 a 30)
+            new Chart(document.getElementById('chart-todas'), {
+                type: 'line',
+                data: {
+                    labels: periodos30.slice(19, 30), 
+                    datasets: [
+                        { label: 'Ventas reales', data: ventas30.slice(19, 30), borderColor: '#2c3e50', backgroundColor: '#2c3e50', tension: 0.1, borderWidth: 3 },
+                        { label: 'ARIMA', data: arima.slice(19, 30), borderColor: '#d38b5d', borderDash: [5,5], tension: 0.2 },
+                        { label: 'Holt (Agresivo)', data: holt_a.slice(19, 30), borderColor: '#4a7c59', borderDash: [5,5], tension: 0.2 },
+                        { label: 'Último Valor', data: ultimo_valor.slice(19, 30), borderColor: '#d4a5a5', borderDash: [5,5], tension: 0.2 },
+                        { label: 'SES (0.9)', data: ses_09.slice(19, 30), borderColor: '#b76e79', borderDash: [5,5], tension: 0.2 },
+                        { label: 'Prom. Móvil (n=3)', data: n3.slice(19, 30), borderColor: '#9a6a6a', borderDash: [5,5], tension: 0.2 },
+                        { label: 'Regresión', data: regresion.slice(19, 30), borderColor: '#e08e79', borderDash: [5,5], tension: 0.1 },
+                        { label: 'Prom. Simple', data: prom_simple.slice(19, 30), borderColor: '#e69a8d', borderDash: [5,5], tension: 0.1 }
+                    ]
+                },
+                options: chartOptions('Miles de Pesos')
+            });
+        });
+    </script>
+</body>
+</html>
